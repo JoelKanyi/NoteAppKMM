@@ -1,17 +1,12 @@
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
+    id("com.squareup.sqldelight")
 }
 
 kotlin {
-    android {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "1.8"
-            }
-        }
-    }
-    
+    android()
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -23,18 +18,31 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting
+        val commonMain by getting {
+            dependencies {
+                implementation("com.squareup.sqldelight:runtime:1.5.4")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+            }
+        }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
             }
         }
-        val androidMain by getting
-        val androidUnitTest by getting
+        val androidMain by getting {
+            dependencies {
+                implementation("com.squareup.sqldelight:android-driver:1.5.4")
+            }
+        }
+        val androidTest by getting
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
         val iosMain by creating {
+            dependencies {
+                implementation("com.squareup.sqldelight:native-driver:1.5.4")
+            }
+
             dependsOn(commonMain)
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
@@ -52,8 +60,15 @@ kotlin {
     }
 }
 
+sqldelight {
+    database("NoteDatabase") {
+        packageName = "com.joelkanyi.noteappkmm.database"
+        sourceFolders = listOf("sqldelight")
+    }
+}
+
 android {
-    namespace = "com.joelkanyi.noteappkmm"
+    namespace = "com.plcoding.noteappkmm"
     compileSdk = 33
     defaultConfig {
         minSdk = 21
